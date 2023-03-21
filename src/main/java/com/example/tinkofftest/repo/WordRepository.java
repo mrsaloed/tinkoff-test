@@ -4,5 +4,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface WordRepository {
-    void save(UUID requestId, List<String> word);
+    void save(UUID requestId, List<String> words);
 }

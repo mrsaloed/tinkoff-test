@@ -1,11 +1,12 @@
-package com.example.tinkofftest.services;
+package com.example.tinkofftest.services.impl;
 
 import com.example.tinkofftest.dto.yandex.YandexMessageToTranslate;
+import com.example.tinkofftest.dto.yandex.YandexTranslateError;
 import com.example.tinkofftest.dto.yandex.YandexTranslatedMessage;
 import com.example.tinkofftest.dto.yandex.YandexTranslatedWord;
 import com.example.tinkofftest.exceptions.TranslateServiceException;
 import com.example.tinkofftest.properties.YandexProperties;
-
+import com.example.tinkofftest.services.TranslateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -65,7 +66,9 @@ public class YandexTranslateService implements TranslateService {
             HttpEntity<YandexMessageToTranslate> request = new HttpEntity<>(yandexMessageToTranslate, headers);
             return yandexTranslate.postForObject(yandexProperties.getApiPath(), request, YandexTranslatedMessage.class);
         } catch (HttpClientErrorException ex) {
-            throw new TranslateServiceException(ex.getStatusCode(), ex.getMessage());
+            YandexTranslateError error = ex.getResponseBodyAs(YandexTranslateError.class);
+            String errorMessage = error != null ? error.getMessage() : ex.getMessage();
+            throw new TranslateServiceException(ex.getStatusCode(), errorMessage);
         }
     }
 

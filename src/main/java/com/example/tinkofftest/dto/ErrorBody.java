@@ -1,7 +1,13 @@
 package com.example.tinkofftest.dto;
 
+import org.springframework.http.HttpStatusCode;
+
+
 public class ErrorBody {
+
+    private int statusCode;
     private String error;
+
 
     public String getError() {
         return error;
@@ -11,7 +17,17 @@ public class ErrorBody {
         this.error = error;
     }
 
-    public ErrorBody(String error) {
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(HttpStatusCode statusCode) {
+        this.statusCode = statusCode.value();
+    }
+
+
+    public ErrorBody(String error, HttpStatusCode statusCode) {
         this.error = error;
+        this.statusCode = statusCode.value();
     }
 }

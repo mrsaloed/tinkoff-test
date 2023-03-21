@@ -1,5 +1,6 @@
-package com.example.tinkofftest.repo;
+package com.example.tinkofftest.repo.impl;
 
+import com.example.tinkofftest.repo.WordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Repository
 public class H2WordRepository implements WordRepository {
 
+    private static final String SQL_INSERT = "INSERT INTO Words VALUES (?,?)";
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
@@ -22,7 +24,7 @@ public class H2WordRepository implements WordRepository {
 
     @Override
     public void save(UUID requestId, List<String> word) {
-        jdbcTemplate.batchUpdate("INSERT INTO Words VALUES (?,?)",
+        jdbcTemplate.batchUpdate(SQL_INSERT,
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {

@@ -7,6 +7,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.nio.charset.Charset;
 
 public class TranslateServiceException extends HttpClientErrorException {
+
     public TranslateServiceException(HttpStatusCode statusCode) {
         super(statusCode);
     }
