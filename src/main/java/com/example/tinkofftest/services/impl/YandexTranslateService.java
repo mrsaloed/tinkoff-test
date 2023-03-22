@@ -23,6 +23,7 @@ public class YandexTranslateService implements TranslateService {
 
     private static final String REGEX_FOR_SPLIT_LANGUAGE_PARAMETERS = "-";
     private static final String REGEX_FOR_SPLIT_WORDS_FROM_MESSAGE = "\\s";
+    private static final String AUTHORIZATION_HEADER_KEY = "Authorization";
     private final YandexProperties yandexProperties;
 
     @Autowired
@@ -61,7 +62,7 @@ public class YandexTranslateService implements TranslateService {
         RestTemplate yandexTranslate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(yandexProperties.getToken());
+        headers.set(AUTHORIZATION_HEADER_KEY, yandexProperties.getToken());
         try {
             HttpEntity<YandexMessageToTranslate> request = new HttpEntity<>(yandexMessageToTranslate, headers);
             return yandexTranslate.postForObject(yandexProperties.getApiPath(), request, YandexTranslatedMessage.class);

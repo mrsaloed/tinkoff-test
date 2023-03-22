@@ -4,7 +4,7 @@ create table if not exists Requests
   inputData CLOB not null,
   outputData CLOB not null,
   requestTime time not null,
-  parameters varchar(5) not null,
+  parameters varchar not null,
   ipAddress varchar(39) not null
 );
 
