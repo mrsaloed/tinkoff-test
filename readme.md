@@ -25,7 +25,7 @@ docker run -p 8080:8080 tinkoff/test
     "message": "Hi Tinkoff!"
 }
 ```
-или, если фозникает ошиька:
+или, если возникает ошибка:
 ```
 {
     "statusCode": 400,
