@@ -1,8 +1,6 @@
 package com.example.tinkofftest.dto.yandex;
 
-import java.io.Serializable;
-
-public class YandexTranslateErrorDetail implements Serializable {
+public class YandexTranslateErrorDetail {
     private String type;
     private String requestId;
 

@@ -1,10 +1,5 @@
 package com.example.tinkofftest.dto;
 
-import org.springframework.stereotype.Component;
-import org.springframework.web.context.annotation.RequestScope;
-
-@Component
-@RequestScope
 public class MessageToTranslateBody {
 
     private String parameters;

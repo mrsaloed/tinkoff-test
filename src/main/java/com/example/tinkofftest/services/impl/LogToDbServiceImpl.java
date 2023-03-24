@@ -33,11 +33,12 @@ public class LogToDbServiceImpl implements LogToDbService {
         this.properties = properties;
     }
 
-    public void log(String inputData,
-                    String outputData,
-                    String parameters,
-                    List<String> translatedWords,
-                    String ip) {
+    @Override
+    public void logSuccess(String inputData,
+                           String outputData,
+                           String parameters,
+                           List<String> translatedWords,
+                           String ip) {
         UUID requestId = UUID.randomUUID();
         try (Connection connection = getNewConnection()) {
             connection.setAutoCommit(false);
@@ -51,6 +52,16 @@ public class LogToDbServiceImpl implements LogToDbService {
             }
             connection.commit();
             connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            throw new SaveToDatabaseException(e);
+        }
+    }
+
+    @Override
+    public void logFailure(String inputData, String outputData, String parameters, String ip) {
+        UUID requestId = UUID.randomUUID();
+        try (Connection connection = getNewConnection()) {
+            saveRequest(connection, requestId.toString(), inputData, outputData, parameters, ip);
         } catch (SQLException e) {
             throw new SaveToDatabaseException(e);
         }
@@ -83,14 +94,14 @@ public class LogToDbServiceImpl implements LogToDbService {
 
     private void saveWords(Connection connection, String requestId, List<String> translatedWords) throws SQLException {
         try (PreparedStatement insertWordTable = connection.prepareStatement(INSERT_WORD_TABLE)) {
-            if (translatedWords != null) {
-                for (String word : translatedWords) {
-                    insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, requestId);
-                    insertWordTable.setString(WORD_PARAMETER_INDEX, word);
-                    insertWordTable.addBatch();
-                }
-                insertWordTable.executeBatch();
+
+            for (String word : translatedWords) {
+                insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, requestId);
+                insertWordTable.setString(WORD_PARAMETER_INDEX, word);
+                insertWordTable.addBatch();
             }
+            insertWordTable.executeBatch();
+
         }
     }
 }

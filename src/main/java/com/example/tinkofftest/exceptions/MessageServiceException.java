@@ -2,7 +2,7 @@ package com.example.tinkofftest.exceptions;
 
 import org.springframework.http.HttpStatusCode;
 
-public class MessageServiceException extends Exception {
+public class MessageServiceException extends RuntimeException {
 
     private final HttpStatusCode statusCode;
 

@@ -1,12 +1,8 @@
 package com.example.tinkofftest.dto;
 
-import org.springframework.stereotype.Component;
-
-import java.io.Serializable;
 import java.util.List;
 
-@Component
-public class TranslatedMessageBody implements Serializable {
+public class TranslatedMessageBody {
 
     private String message;
 
