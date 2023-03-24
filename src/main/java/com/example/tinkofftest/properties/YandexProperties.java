@@ -24,7 +24,6 @@ public class YandexProperties {
     }
 
     public void setToken(String token) {
-
         this.token = API_KEY_PREFIX + token;
     }
 
