@@ -5,6 +5,14 @@ public class MessageToTranslateBody {
     private String parameters;
     private String message;
 
+    public MessageToTranslateBody() {
+    }
+
+    public MessageToTranslateBody(String parameters, String message) {
+        this.parameters = parameters;
+        this.message = message;
+    }
+
     public String getParameters() {
         return parameters;
     }

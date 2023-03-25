@@ -8,6 +8,13 @@ public class ErrorBody {
     private int statusCode;
     private String error;
 
+    public ErrorBody() {
+    }
+
+    public ErrorBody(int statusCode, String error) {
+        this.statusCode = statusCode;
+        this.error = error;
+    }
 
     public String getError() {
         return error;

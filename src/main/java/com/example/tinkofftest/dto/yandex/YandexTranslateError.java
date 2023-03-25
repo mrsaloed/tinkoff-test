@@ -8,6 +8,15 @@ public class YandexTranslateError {
 
     private List<YandexTranslateErrorDetail> details;
 
+    public YandexTranslateError() {
+    }
+
+    public YandexTranslateError(int code, String message, List<YandexTranslateErrorDetail> details) {
+        this.code = code;
+        this.message = message;
+        this.details = details;
+    }
+
     public List<YandexTranslateErrorDetail> getDetails() {
         return details;
     }

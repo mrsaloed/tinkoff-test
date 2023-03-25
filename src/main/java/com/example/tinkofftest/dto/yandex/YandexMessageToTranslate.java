@@ -6,6 +6,9 @@ public class YandexMessageToTranslate {
     private String targetLanguageCode;
     private String folderId;
 
+    public YandexMessageToTranslate() {
+    }
+
     public YandexMessageToTranslate(String[] texts, String sourceLanguageCode, String targetLanguageCode, String folderId) {
         this.texts = texts;
         this.sourceLanguageCode = sourceLanguageCode;

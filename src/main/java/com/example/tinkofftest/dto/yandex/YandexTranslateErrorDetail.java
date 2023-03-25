@@ -4,6 +4,14 @@ public class YandexTranslateErrorDetail {
     private String type;
     private String requestId;
 
+    public YandexTranslateErrorDetail() {
+    }
+
+    public YandexTranslateErrorDetail(String type, String requestId) {
+        this.type = type;
+        this.requestId = requestId;
+    }
+
     public String getType() {
         return type;
     }

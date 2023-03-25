@@ -6,6 +6,14 @@ public class TranslatedMessageBody {
 
     private String message;
 
+    public TranslatedMessageBody() {
+    }
+
+    public TranslatedMessageBody(String message) {
+        this.message = message;
+    }
+
+
     public String getMessage() {
         return message;
     }
