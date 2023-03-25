@@ -1,7 +1,9 @@
 package com.example.tinkofftest.dto.yandex;
 
+import java.util.List;
+
 public class YandexMessageToTranslate {
-    private String[] texts;
+    private List<String> texts;
     private String sourceLanguageCode;
     private String targetLanguageCode;
     private String folderId;
@@ -9,7 +11,7 @@ public class YandexMessageToTranslate {
     public YandexMessageToTranslate() {
     }
 
-    public YandexMessageToTranslate(String[] texts, String sourceLanguageCode, String targetLanguageCode, String folderId) {
+    public YandexMessageToTranslate(List<String> texts, String sourceLanguageCode, String targetLanguageCode, String folderId) {
         this.texts = texts;
         this.sourceLanguageCode = sourceLanguageCode;
         this.targetLanguageCode = targetLanguageCode;
@@ -40,11 +42,11 @@ public class YandexMessageToTranslate {
         this.sourceLanguageCode = sourceLanguageCode;
     }
 
-    public String[] getTexts() {
+    public List<String> getTexts() {
         return texts;
     }
 
-    public void setTexts(String[] texts) {
+    public void setTexts(List<String> texts) {
         this.texts = texts;
     }
 

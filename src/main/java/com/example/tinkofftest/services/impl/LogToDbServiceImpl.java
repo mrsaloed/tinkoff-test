@@ -87,9 +87,12 @@ public class LogToDbServiceImpl implements LogToDbService {
     private void saveWords(Connection connection, RequestEntity request) throws SQLException {
         try (PreparedStatement insertWordTable = connection.prepareStatement(INSERT_WORD_TABLE)) {
             for (String word : request.getTranslatedWords()) {
-                insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
-                insertWordTable.setString(WORD_PARAMETER_INDEX, word);
-                insertWordTable.addBatch();
+                if(word != null && !word.isEmpty()) {
+
+                    insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
+                    insertWordTable.setString(WORD_PARAMETER_INDEX, word);
+                    insertWordTable.addBatch();
+                }
             }
             insertWordTable.executeBatch();
         }

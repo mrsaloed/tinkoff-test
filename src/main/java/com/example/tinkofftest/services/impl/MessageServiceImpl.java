@@ -50,6 +50,7 @@ public class MessageServiceImpl implements MessageService {
         message = messageToTranslateBody.getMessage();
         translateParameters = messageToTranslateBody.getParameters();
         try {
+            
             translatedWords = translateService.translate(message, translateParameters);
             String translatedMessage = getFromTranslatedWords();
             TranslatedMessageBody translatedMessageBody = new TranslatedMessageBody();
