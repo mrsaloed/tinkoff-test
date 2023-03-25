@@ -1,5 +1,6 @@
 package com.example.tinkofftest.services.impl;
 
+import com.example.tinkofftest.entities.RequestEntity;
 import com.example.tinkofftest.exceptions.db.SaveToDatabaseException;
 import com.example.tinkofftest.properties.H2Properties;
 import com.example.tinkofftest.services.LogToDbService;
@@ -7,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
-import java.sql.*;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 @Service
 @RequestScope
@@ -34,17 +35,13 @@ public class LogToDbServiceImpl implements LogToDbService {
     }
 
     @Override
-    public void logSuccess(String inputData,
-                           String outputData,
-                           String parameters,
-                           List<String> translatedWords,
+    public void logSuccess(RequestEntity request,
                            String ip) {
-        UUID requestId = UUID.randomUUID();
         try (Connection connection = getNewConnection()) {
             connection.setAutoCommit(false);
             try {
-                saveRequest(connection, requestId.toString(), inputData, outputData, parameters, ip);
-                saveWords(connection, requestId.toString(), translatedWords);
+                saveRequest(connection, request, ip);
+                saveWords(connection, request);
             } catch (SQLException e) {
                 connection.rollback();
                 connection.setAutoCommit(true);
@@ -58,10 +55,9 @@ public class LogToDbServiceImpl implements LogToDbService {
     }
 
     @Override
-    public void logFailure(String inputData, String outputData, String parameters, String ip) {
-        UUID requestId = UUID.randomUUID();
+    public void logFailure(RequestEntity request, String ip) {
         try (Connection connection = getNewConnection()) {
-            saveRequest(connection, requestId.toString(), inputData, outputData, parameters, ip);
+            saveRequest(connection, request, ip);
         } catch (SQLException e) {
             throw new SaveToDatabaseException(e);
         }
@@ -75,33 +71,27 @@ public class LogToDbServiceImpl implements LogToDbService {
     }
 
     private void saveRequest(Connection connection,
-                             String requestId,
-                             String inputData,
-                             String outputData,
-                             String parameters,
+                             RequestEntity request,
                              String ip) throws SQLException {
-        Time time = Time.valueOf(LocalDateTime.now().toLocalTime());
         try (PreparedStatement insertRequestTable = connection.prepareStatement(INSERT_REQUEST_TABLE)) {
-            insertRequestTable.setString(REQUEST_ID_PARAMETER_INDEX, requestId);
-            insertRequestTable.setString(REQUEST_MESSAGE_PARAMETER_INDEX, inputData);
-            insertRequestTable.setString(RESPONSE_MESSAGE_PARAMETER_INDEX, outputData);
-            insertRequestTable.setTime(TIME_PARAMETER_INDEX, time);
-            insertRequestTable.setString(TRANSLATE_PARAMS_PARAMETER_INDEX, parameters);
+            insertRequestTable.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
+            insertRequestTable.setString(REQUEST_MESSAGE_PARAMETER_INDEX, request.getInputData());
+            insertRequestTable.setString(RESPONSE_MESSAGE_PARAMETER_INDEX, request.getOutputData());
+            insertRequestTable.setTime(TIME_PARAMETER_INDEX, request.getRequestTime());
+            insertRequestTable.setString(TRANSLATE_PARAMS_PARAMETER_INDEX, request.getParameters());
             insertRequestTable.setString(IP_PARAMETER_INDEX, ip);
             insertRequestTable.executeUpdate();
         }
     }
 
-    private void saveWords(Connection connection, String requestId, List<String> translatedWords) throws SQLException {
+    private void saveWords(Connection connection, RequestEntity request) throws SQLException {
         try (PreparedStatement insertWordTable = connection.prepareStatement(INSERT_WORD_TABLE)) {
-
-            for (String word : translatedWords) {
-                insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, requestId);
+            for (String word : request.getTranslatedWords()) {
+                insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
                 insertWordTable.setString(WORD_PARAMETER_INDEX, word);
                 insertWordTable.addBatch();
             }
             insertWordTable.executeBatch();
-
         }
     }
 }

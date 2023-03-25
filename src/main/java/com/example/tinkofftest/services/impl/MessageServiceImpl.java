@@ -2,6 +2,7 @@ package com.example.tinkofftest.services.impl;
 
 import com.example.tinkofftest.dto.MessageToTranslateBody;
 import com.example.tinkofftest.dto.TranslatedMessageBody;
+import com.example.tinkofftest.entities.RequestEntity;
 import com.example.tinkofftest.exceptions.MessageServiceException;
 import com.example.tinkofftest.exceptions.TranslateServiceException;
 import com.example.tinkofftest.services.MessageService;
@@ -23,6 +24,7 @@ public class MessageServiceImpl implements MessageService {
     private String translateParameters;
 
     private final TranslateService translateService;
+    private RequestEntity requestEntity;
 
     @Autowired
     public MessageServiceImpl(TranslateService translateService) {
@@ -52,13 +54,19 @@ public class MessageServiceImpl implements MessageService {
             String translatedMessage = getFromTranslatedWords();
             TranslatedMessageBody translatedMessageBody = new TranslatedMessageBody();
             translatedMessageBody.setMessage(translatedMessage);
+            requestEntity = new RequestEntity(message, translatedMessage, translateParameters, translatedWords);
             return translatedMessageBody;
         } catch (TranslateServiceException ex) {
+            requestEntity = new RequestEntity(message, ex.getMessage(), translateParameters);
             throw new MessageServiceException(ex.getStatusCode(), ex.getMessage(), ex);
         }
     }
 
     private String getFromTranslatedWords() {
         return String.join(DELIMITER_FOR_CONVERT_WORDS_TO_MSG, translatedWords);
+    }
+
+    public RequestEntity getRequestEntity() {
+        return requestEntity;
     }
 }

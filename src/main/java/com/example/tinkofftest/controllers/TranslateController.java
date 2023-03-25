@@ -3,6 +3,7 @@ package com.example.tinkofftest.controllers;
 import com.example.tinkofftest.dto.ErrorBody;
 import com.example.tinkofftest.dto.MessageToTranslateBody;
 import com.example.tinkofftest.dto.TranslatedMessageBody;
+import com.example.tinkofftest.entities.RequestEntity;
 import com.example.tinkofftest.exceptions.MessageServiceException;
 import com.example.tinkofftest.exceptions.db.SaveToDatabaseException;
 import com.example.tinkofftest.services.LogToDbService;
@@ -17,8 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.annotation.RequestScope;
-
-import java.util.List;
 
 
 @RestController
@@ -38,16 +37,13 @@ public class TranslateController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_HTML_VALUE})
     public ResponseEntity<TranslatedMessageBody> translate(@RequestBody MessageToTranslateBody messageToTranslateBody,
-                                       HttpServletRequest request) {
+                                                           HttpServletRequest request) {
         TranslatedMessageBody translatedMessage = messageService.translate(messageToTranslateBody);
 
-        String inputData = messageService.getMessage();
-        String parameters = messageService.getTranslateParameters();
         String ip = request.getRemoteAddr();
-        String outputData = translatedMessage.getMessage();
-        List<String> words = messageService.getTranslatedWords();
+        RequestEntity requestEntity = messageService.getRequestEntity();
 
-        logToDbService.logSuccess(inputData, outputData, parameters, words, ip);
+        logToDbService.logSuccess(requestEntity, ip);
 
         return new ResponseEntity<>(translatedMessage, HttpStatus.OK);
     }
@@ -57,27 +53,23 @@ public class TranslateController {
                                                                     HttpServletRequest request) {
         ErrorBody errorBody = new ErrorBody(ex.getMessage(), ex.getStatusCode());
 
-        String inputData = messageService.getMessage();
-        String parameters = messageService.getTranslateParameters();
         String ip = request.getRemoteAddr();
-        String outputData = ex.getMessage();
+        RequestEntity requestEntity = messageService.getRequestEntity();
 
-        logToDbService.logFailure(inputData, outputData, parameters, ip);
+        logToDbService.logFailure(requestEntity, ip);
 
         return new ResponseEntity<>(errorBody, ex.getStatusCode());
     }
 
     @ExceptionHandler(SaveToDatabaseException.class)
     public ResponseEntity<ErrorBody> databaseExceptionHandler(SaveToDatabaseException ex,
-                                                   HttpServletRequest request) {
+                                                              HttpServletRequest request) {
         ErrorBody errorBody = new ErrorBody(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 
-        String inputData = messageService.getMessage();
-        String parameters = messageService.getTranslateParameters();
         String ip = request.getRemoteAddr();
-        String outputData = ex.getMessage();
+        RequestEntity requestEntity = messageService.getRequestEntity();
 
-        logToDbService.logFailure(inputData, outputData, parameters, ip);
+        logToDbService.logFailure(requestEntity, ip);
 
         return new ResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }

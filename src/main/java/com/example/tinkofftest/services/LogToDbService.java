@@ -1,8 +1,9 @@
 package com.example.tinkofftest.services;
 
-import java.util.List;
+import com.example.tinkofftest.entities.RequestEntity;
 
 public interface LogToDbService {
-    void logSuccess(String inputData, String outputData, String parameters, List<String> translatedWords, String ip);
-    void logFailure(String inputData, String outputData, String parameters, String ip);
+    void logSuccess(RequestEntity requestEntity, String ip);
+
+    void logFailure(RequestEntity requestEntity, String ip);
 }
