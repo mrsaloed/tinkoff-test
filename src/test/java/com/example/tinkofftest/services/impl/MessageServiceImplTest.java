@@ -41,13 +41,13 @@ class MessageServiceImplTest {
     }
 
     @Test
-    void shouldReturnCorrectParam() {
+    void shouldPassNormally_getTranslateParameters() {
         String actual = messageService.getTranslateParameters();
         assertEquals(CORRECT_PARAMS, actual);
     }
 
     @Test
-    void getTranslateParametersFail() {
+    void shouldThrowEx_getTranslateParameters() {
         assertThrows(MessageServiceException.class, () -> {
             messageToTranslateBody = getIncorrectMessage();
             messageService.translate(messageToTranslateBody);
@@ -59,13 +59,13 @@ class MessageServiceImplTest {
     }
 
     @Test
-    void getMessage() {
+    void shouldPassNormally_getMessage() {
         String actual = messageService.getMessage();
         assertEquals(CORRECT_MESSAGE, actual);
     }
 
     @Test
-    void getMessageFail() {
+    void shouldThrowEx_getMessage() {
         assertThrows(MessageServiceException.class, () -> {
             messageToTranslateBody = getIncorrectMessage();
             messageService.translate(messageToTranslateBody);

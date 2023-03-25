@@ -6,19 +6,20 @@ import java.util.List;
 import java.util.UUID;
 
 public class RequestEntity {
-    private UUID id;
+    private final UUID id;
     private String inputData;
     private String outputData;
     private String parameters;
     private List<String> translatedWords;
-    private Time requestTime;
+    private final Time requestTime;
 
     public RequestEntity() {
+        this.id = UUID.randomUUID();
+        this.requestTime = Time.valueOf(LocalDateTime.now().toLocalTime());
     }
 
     public RequestEntity(String inputData, String outputData, String parameters, List<String> translatedWords) {
-        this.id = UUID.randomUUID();
-        this.requestTime = Time.valueOf(LocalDateTime.now().toLocalTime());
+        this();
         this.inputData = inputData;
         this.outputData = outputData;
         this.parameters = parameters;
@@ -26,8 +27,7 @@ public class RequestEntity {
     }
 
     public RequestEntity(String inputData, String outputData, String parameters) {
-        this.id = UUID.randomUUID();
-        this.requestTime = Time.valueOf(LocalDateTime.now().toLocalTime());
+        this();
         this.inputData = inputData;
         this.outputData = outputData;
         this.parameters = parameters;
