@@ -20,7 +20,8 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class YandexTranslateService implements TranslateService {
         this.yandexProperties = yandexProperties;
     }
 
-    @Async
+//TODO REFACTOR THIS
     public List<String> translate(String message, String parameters) throws TranslateServiceException {
         String sourceLanguageCode = getSourceLanguageCodeFromParams(parameters);
         String targetLanguageCode = getTargetLanguageCodeFromParams(parameters);
@@ -46,7 +47,7 @@ public class YandexTranslateService implements TranslateService {
 
         List<List<String>> parts = getTenSubList(wordsToTranslate);
 
-        List<CompletableFuture<YandexTranslatedMessage>> completableFutures = new ArrayList<>();
+        List<Callable<YandexTranslatedMessage>> completableFutures = new ArrayList<>();
         for (int i = 0; i < COUNT_OF_THREADS; i++) {
             YandexMessageToTranslate yandexMessageToTranslate = new YandexMessageToTranslate(
                     parts.get(i),
@@ -54,23 +55,35 @@ public class YandexTranslateService implements TranslateService {
                     targetLanguageCode,
                     yandexProperties.getFolderId()
             );
-            completableFutures.add(getTranslateFromYandex(yandexMessageToTranslate));
+            completableFutures.add(() -> getTranslateFromYandex(yandexMessageToTranslate));
         }
 
-        List<YandexTranslatedMessage> translatedWords = completableFutures.stream()
-                .map(CompletableFuture::join)
-                .toList();
+        List<FutureTask<YandexTranslatedMessage>> futureTasks = new ArrayList<>();
+        for (Callable<YandexTranslatedMessage> completableFuture : completableFutures) {
+            FutureTask<YandexTranslatedMessage> futureTask = new FutureTask<>(completableFuture);
+            futureTasks.add(futureTask);
+            new Thread(futureTask).start();
+        }
 
-        List<String> list = new ArrayList<>();
-        translatedWords.stream()
+        List<YandexTranslatedMessage> list = new ArrayList<>();
+        try {
+            for (FutureTask<YandexTranslatedMessage> futureTask : futureTasks) {
+                list.add(futureTask.get());
+            }
+        } catch (Exception e) {
+            throw new TranslateServiceException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+
+        List<String> result = new ArrayList<>();
+        list.stream()
                 .map(this::getTranslatedMessageFromYandexTranslatedMessage).
-                forEach(list::addAll);
+                forEach(result::addAll);
 
-        return list;
+        return result;
     }
 
     @Async
-    public CompletableFuture<YandexTranslatedMessage> getTranslateFromYandex(YandexMessageToTranslate yandexMessageToTranslate)
+    public YandexTranslatedMessage getTranslateFromYandex(YandexMessageToTranslate yandexMessageToTranslate)
             throws TranslateServiceException {
         RestTemplate yandexTranslate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
@@ -78,7 +91,7 @@ public class YandexTranslateService implements TranslateService {
         headers.set(AUTHORIZATION_HEADER_KEY, yandexProperties.getToken());
         try {
             HttpEntity<YandexMessageToTranslate> request = new HttpEntity<>(yandexMessageToTranslate, headers);
-            return CompletableFuture.completedFuture(yandexTranslate.postForObject(yandexProperties.getApiPath(), request, YandexTranslatedMessage.class));
+            return yandexTranslate.postForObject(yandexProperties.getApiPath(), request, YandexTranslatedMessage.class);
         } catch (HttpClientErrorException ex) {
             YandexTranslateError error = ex.getResponseBodyAs(YandexTranslateError.class);
             String errorMessage = error != null ? error.getMessage() : ex.getMessage();
@@ -114,7 +127,7 @@ public class YandexTranslateService implements TranslateService {
 
     private List<List<String>> getTenSubList(List<String> array) {
         int size = array.size();
-        int partitionSize = size/ COUNT_OF_THREADS;
+        int partitionSize = size / COUNT_OF_THREADS;
         int remainder = size % COUNT_OF_THREADS;
 
         List<List<String>> parts = new ArrayList<>();
