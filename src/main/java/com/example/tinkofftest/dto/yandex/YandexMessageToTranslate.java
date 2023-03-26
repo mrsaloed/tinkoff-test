@@ -6,24 +6,14 @@ public class YandexMessageToTranslate {
     private List<String> texts;
     private String sourceLanguageCode;
     private String targetLanguageCode;
-    private String folderId;
 
     public YandexMessageToTranslate() {
     }
 
-    public YandexMessageToTranslate(List<String> texts, String sourceLanguageCode, String targetLanguageCode, String folderId) {
+    public YandexMessageToTranslate(List<String> texts, String sourceLanguageCode, String targetLanguageCode) {
         this.texts = texts;
         this.sourceLanguageCode = sourceLanguageCode;
         this.targetLanguageCode = targetLanguageCode;
-        this.folderId = folderId;
-    }
-
-    public String getFolderId() {
-        return folderId;
-    }
-
-    public void setFolderId(String folderId) {
-        this.folderId = folderId;
     }
 
     public String getTargetLanguageCode() {

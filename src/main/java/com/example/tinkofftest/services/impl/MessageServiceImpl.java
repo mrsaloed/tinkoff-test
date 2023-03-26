@@ -23,8 +23,8 @@ public class MessageServiceImpl implements MessageService {
     private List<String> translatedWords;
     private String translateParameters;
 
-    private final TranslateService translateService;
     private RequestEntity requestEntity;
+    private final TranslateService translateService;
 
     @Autowired
     public MessageServiceImpl(TranslateService translateService) {
@@ -50,11 +50,9 @@ public class MessageServiceImpl implements MessageService {
         message = messageToTranslateBody.getMessage();
         translateParameters = messageToTranslateBody.getParameters();
         try {
-            
             translatedWords = translateService.translate(message, translateParameters);
             String translatedMessage = getFromTranslatedWords();
-            TranslatedMessageBody translatedMessageBody = new TranslatedMessageBody();
-            translatedMessageBody.setMessage(translatedMessage);
+            TranslatedMessageBody translatedMessageBody = new TranslatedMessageBody(translatedMessage);
             requestEntity = new RequestEntity(message, translatedMessage, translateParameters, translatedWords);
             return translatedMessageBody;
         } catch (TranslateServiceException ex) {
