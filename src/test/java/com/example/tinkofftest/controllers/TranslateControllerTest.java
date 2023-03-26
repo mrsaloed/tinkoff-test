@@ -74,7 +74,7 @@ class TranslateControllerTest {
         return message;
     }
 
-    private Object getIncorrectParamBody() {
+    private MessageToTranslateBody getIncorrectParamBody() {
         MessageToTranslateBody message = new MessageToTranslateBody();
         message.setMessage(CORRECT_MESSAGE);
         message.setParameters(INCORRECT_PARAMS);

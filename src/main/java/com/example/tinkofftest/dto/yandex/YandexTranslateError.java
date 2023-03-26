@@ -5,7 +5,6 @@ import java.util.List;
 public class YandexTranslateError {
     private int code;
     private String message;
-
     private List<YandexTranslateErrorDetail> details;
 
     public YandexTranslateError() {

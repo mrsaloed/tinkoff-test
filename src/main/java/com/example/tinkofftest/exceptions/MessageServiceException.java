@@ -10,6 +10,11 @@ public class MessageServiceException extends RuntimeException {
         return statusCode;
     }
 
+    public MessageServiceException(HttpStatusCode statusCode, String message) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+
     public MessageServiceException(HttpStatusCode statusCode, String message, Throwable cause) {
         super(message, cause);
         this.statusCode = statusCode;
