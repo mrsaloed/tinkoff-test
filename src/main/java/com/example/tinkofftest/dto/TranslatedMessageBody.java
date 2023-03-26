@@ -13,7 +13,6 @@ public class TranslatedMessageBody {
         this.message = message;
     }
 
-
     public String getMessage() {
         return message;
     }

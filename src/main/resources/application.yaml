@@ -1,5 +1,4 @@
 yandex:
-  folderId: ${YANDEX_FOLDER_ID}
   token: ${YANDEX_TOKEN}
   api-path: "https://translate.api.cloud.yandex.net/translate/v2/translate"
 

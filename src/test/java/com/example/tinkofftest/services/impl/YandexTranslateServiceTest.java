@@ -4,19 +4,19 @@ import com.example.tinkofftest.exceptions.TranslateServiceException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertLinesMatch;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @SpringBootTest
 class YandexTranslateServiceTest {
 
-    public static final String CORRECT_MESSAGE = "Hi Tinkoff!";
-    public static final String CORRECT_PARAMS = "en-ru";
-    public static final String INCORRECT_PARAMS = "1";
-    public static final String EMPTY_MESSAGE = "";
+    private static final String CORRECT_MESSAGE = "Hi Tinkoff!";
+    private static final String CORRECT_PARAMS = "en-ru";
+    private static final String INCORRECT_PARAMS = "1";
+    private static final String EMPTY_MESSAGE = "";
+
     @Autowired
     private YandexTranslateService service;
 

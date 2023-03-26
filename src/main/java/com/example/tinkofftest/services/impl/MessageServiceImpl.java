@@ -8,6 +8,7 @@ import com.example.tinkofftest.exceptions.TranslateServiceException;
 import com.example.tinkofftest.services.MessageService;
 import com.example.tinkofftest.services.TranslateService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.annotation.RequestScope;
 
@@ -16,13 +17,13 @@ import java.util.List;
 @Service
 @RequestScope
 public class MessageServiceImpl implements MessageService {
+    private static final String ILLEGAL_METHOD_ACCESS_MESSAGE = "Must first translate(), before using this method";
     private static final String DELIMITER_FOR_CONVERT_WORDS_TO_MSG = " ";
     private static final String REGEX_FOR_ONLY_WORDS = "[^\\da-zA-Zа-яёА-ЯЁ ]";
     private static final String EMPTY_STRING = "";
     private String message;
     private List<String> translatedWords;
     private String translateParameters;
-
     private RequestEntity requestEntity;
     private final TranslateService translateService;
 
@@ -32,18 +33,30 @@ public class MessageServiceImpl implements MessageService {
     }
 
     public String getTranslateParameters() {
-        return translateParameters;
+        if (translateParameters != null) {
+            return translateParameters;
+        } else {
+            throw new MessageServiceException(HttpStatus.BAD_REQUEST, ILLEGAL_METHOD_ACCESS_MESSAGE);
+        }
     }
 
     public List<String> getTranslatedWords() {
-        return translatedWords.stream()
-                .map(s -> s.replaceAll(REGEX_FOR_ONLY_WORDS, EMPTY_STRING))
-                .filter(s -> s.length() > 0)
-                .toList();
+        if (translatedWords != null) {
+            return translatedWords.stream()
+                    .map(s -> s.replaceAll(REGEX_FOR_ONLY_WORDS, EMPTY_STRING))
+                    .filter(s -> s.length() > 0)
+                    .toList();
+        } else {
+            throw new MessageServiceException(HttpStatus.BAD_REQUEST, ILLEGAL_METHOD_ACCESS_MESSAGE);
+        }
     }
 
     public String getMessage() {
-        return message;
+        if (message != null) {
+            return message;
+        } else {
+            throw new MessageServiceException(HttpStatus.BAD_REQUEST, ILLEGAL_METHOD_ACCESS_MESSAGE);
+        }
     }
 
     public TranslatedMessageBody translate(MessageToTranslateBody messageToTranslateBody) throws MessageServiceException {
@@ -61,11 +74,15 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
-    private String getFromTranslatedWords() {
-        return String.join(DELIMITER_FOR_CONVERT_WORDS_TO_MSG, translatedWords);
+    public RequestEntity getRequestEntity() {
+        if (requestEntity != null) {
+            return requestEntity;
+        } else {
+            throw new MessageServiceException(HttpStatus.BAD_REQUEST, ILLEGAL_METHOD_ACCESS_MESSAGE);
+        }
     }
 
-    public RequestEntity getRequestEntity() {
-        return requestEntity;
+    private String getFromTranslatedWords() {
+        return String.join(DELIMITER_FOR_CONVERT_WORDS_TO_MSG, translatedWords);
     }
 }

@@ -32,14 +32,16 @@ public class YandexTranslateService implements TranslateService {
     private static final String REGEX_FOR_SPLIT_WORDS_FROM_MESSAGE = "\\s+";
     private static final String AUTHORIZATION_HEADER_KEY = "Authorization";
     private static final String BAD_TRANSLATE_PARAMETERS_EXCEPTION_MESSAGE = "Bad translate parameters!";
-    public static final int COUNT_OF_THREADS = 10;
-    public static final int SOURCE_CODE_INDEX = 0;
-    public static final int TARGET_CODE_INDEX = 1;
+    private static final int SOURCE_CODE_INDEX = 0;
+    private static final int TARGET_CODE_INDEX = 1;
+    private static final int MAX_COUNT_OF_LISTS = 10;
     private final YandexProperties yandexProperties;
+    private final RestTemplate yandexTranslate;
 
     @Autowired
-    public YandexTranslateService(YandexProperties yandexProperties) {
+    public YandexTranslateService(YandexProperties yandexProperties, RestTemplate restTemplate) {
         this.yandexProperties = yandexProperties;
+        this.yandexTranslate = restTemplate;
     }
 
     public List<String> translate(String message, String parameters) throws TranslateServiceException {
@@ -47,20 +49,16 @@ public class YandexTranslateService implements TranslateService {
         String targetLanguageCode = getTargetLanguageCodeFromParams(parameters);
         List<String> wordsToTranslate = splitMessageToWords(message);
 
-        List<List<String>> partsOfInitialWordList = splitIntoSublist(wordsToTranslate);
+        List<List<String>> partsOfInitialWordList = splitIntoParts(wordsToTranslate);
         List<YandexMessageToTranslate> messagesToTranslate =
                 buildListOfMessagesToTranslate(partsOfInitialWordList, sourceLanguageCode, targetLanguageCode);
 
         List<YandexTranslatedMessage> translatedMessages = getAsyncTranslateFromYandex(messagesToTranslate);
-        return getTranslatedMessageFromYandexTranslatedMessage(translatedMessages);
+        return getTranslatedWordsFromYandexTranslatedMessage(translatedMessages);
     }
 
-    private String getSourceLanguageCodeFromParams(String parameters) throws TranslateServiceException {
-        try {
-            return parameters.split(REGEX_FOR_SPLIT_LANGUAGE_PARAMETERS)[SOURCE_CODE_INDEX];
-        } catch (Exception e) {
-            throw new TranslateServiceException(HttpStatus.BAD_REQUEST, BAD_TRANSLATE_PARAMETERS_EXCEPTION_MESSAGE);
-        }
+    private String getSourceLanguageCodeFromParams(String parameters) {
+        return parameters.split(REGEX_FOR_SPLIT_LANGUAGE_PARAMETERS)[SOURCE_CODE_INDEX];
     }
 
     private String getTargetLanguageCodeFromParams(String parameters) throws TranslateServiceException {
@@ -75,16 +73,17 @@ public class YandexTranslateService implements TranslateService {
         return Arrays.stream(message.split(REGEX_FOR_SPLIT_WORDS_FROM_MESSAGE)).toList();
     }
 
-    private List<List<String>> splitIntoSublist(List<String> wordsLIst) {
-        int size = wordsLIst.size();
-        int partitionSize = size / COUNT_OF_THREADS;
-        int remainder = size % COUNT_OF_THREADS;
+    private List<List<String>> splitIntoParts(List<String> wordsList) {
+        int size = wordsList.size();
+        int countOfLists = Math.min(size, MAX_COUNT_OF_LISTS);
+        int partitionSize = size / countOfLists;
+        int remainder = size % countOfLists;
 
         List<List<String>> parts = new ArrayList<>();
         int index = 0;
-        for (int i = 0; i < COUNT_OF_THREADS; i++) {
+        for (int i = 0; i < countOfLists; i++) {
             int partitionLength = partitionSize + (i < remainder ? 1 : 0);
-            parts.add(wordsLIst.subList(index, index + partitionLength));
+            parts.add(wordsList.subList(index, index + partitionLength));
             index += partitionLength;
         }
         return parts;
@@ -129,7 +128,6 @@ public class YandexTranslateService implements TranslateService {
 
     private YandexTranslatedMessage getTranslateFromYandex(YandexMessageToTranslate yandexMessageToTranslate)
             throws TranslateServiceException {
-        RestTemplate yandexTranslate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set(AUTHORIZATION_HEADER_KEY, yandexProperties.getToken());
@@ -143,16 +141,16 @@ public class YandexTranslateService implements TranslateService {
         }
     }
 
-    private List<String> getTranslatedMessageFromYandexTranslatedMessage(YandexTranslatedMessage yandexTranslatedMessage) {
+    private List<String> getTranslatedWordsFromYandexTranslatedMessage(YandexTranslatedMessage yandexTranslatedMessage) {
         return yandexTranslatedMessage.getTranslations().stream()
                 .map(YandexTranslatedWord::getText)
                 .collect(Collectors.toList());
     }
 
-    private List<String> getTranslatedMessageFromYandexTranslatedMessage(List<YandexTranslatedMessage> translatedMessageList) {
+    private List<String> getTranslatedWordsFromYandexTranslatedMessage(List<YandexTranslatedMessage> translatedMessageList) {
         List<String> result = new ArrayList<>();
         translatedMessageList.stream()
-                .map(this::getTranslatedMessageFromYandexTranslatedMessage)
+                .map(this::getTranslatedWordsFromYandexTranslatedMessage)
                 .forEach(result::addAll);
         return result;
     }
