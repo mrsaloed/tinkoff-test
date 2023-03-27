@@ -2,7 +2,7 @@
 
 Сборка Docker image
 ```
-docker build --build-arg DB_PASSWORD=<your_password> --build-arg DB_USERNAME=<your_username> --build-arg --build-arg YANDEX_TOKEN=<your_API_token> -t tinkoff/test .
+docker build --build-arg DB_PASSWORD=<your_password> --build-arg DB_USERNAME=<your_username> --build-arg YANDEX_TOKEN=<your_API_token> -t tinkoff/test .
 ```
 Для генерации API-token воспользуйтесь данной [документацией](https://cloud.yandex.ru/docs/translate/operations/translate), используя _"Сервисный аккаунт"_
 
