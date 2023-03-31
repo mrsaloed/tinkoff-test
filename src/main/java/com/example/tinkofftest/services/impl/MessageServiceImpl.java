@@ -32,6 +32,9 @@ public class MessageServiceImpl implements MessageService {
         this.translateService = translateService;
     }
 
+    /**
+     * @return string with translate parameters
+     */
     public String getTranslateParameters() {
         if (translateParameters != null) {
             return translateParameters;
@@ -40,6 +43,10 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
+
+    /**
+     * @return List of translated words
+     */
     public List<String> getTranslatedWords() {
         if (translatedWords != null) {
             return translatedWords.stream()
@@ -51,6 +58,10 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
+
+    /**
+     * @return incoming message String
+     */
     public String getMessage() {
         if (message != null) {
             return message;
@@ -59,6 +70,12 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
+
+    /**
+     * @param messageToTranslateBody body which was sended with request from controller
+     * @return response body with translated message
+     * @throws MessageServiceException if some problems with translateService
+     */
     public TranslatedMessageBody translate(MessageToTranslateBody messageToTranslateBody) throws MessageServiceException {
         message = messageToTranslateBody.getMessage();
         translateParameters = messageToTranslateBody.getParameters();
@@ -74,6 +91,9 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
+    /**
+     * @return RequestEntity which would be logged into db
+     */
     public RequestEntity getRequestEntity() {
         if (requestEntity != null) {
             return requestEntity;
@@ -82,6 +102,9 @@ public class MessageServiceImpl implements MessageService {
         }
     }
 
+    /**
+     * @return String with translated message from List of translated words
+     */
     private String getFromTranslatedWords() {
         return String.join(DELIMITER_FOR_CONVERT_WORDS_TO_MSG, translatedWords);
     }

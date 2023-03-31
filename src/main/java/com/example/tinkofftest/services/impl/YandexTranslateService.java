@@ -44,6 +44,12 @@ public class YandexTranslateService implements TranslateService {
         this.yandexTranslate = restTemplate;
     }
 
+    /**
+     * @param message String with message to translate
+     * @param parameters translate parameters
+     * @return List of translated words
+     * @throws TranslateServiceException
+     */
     public List<String> translate(String message, String parameters) throws TranslateServiceException {
         String sourceLanguageCode = getSourceLanguageCodeFromParams(parameters);
         String targetLanguageCode = getTargetLanguageCodeFromParams(parameters);
@@ -57,10 +63,21 @@ public class YandexTranslateService implements TranslateService {
         return getTranslatedWordsFromYandexTranslatedMessage(translatedMessages);
     }
 
+
+    /**
+     * @param parameters String parameters with source and target language code
+     * @return String with only source language code
+     */
     private String getSourceLanguageCodeFromParams(String parameters) {
         return parameters.split(REGEX_FOR_SPLIT_LANGUAGE_PARAMETERS)[SOURCE_CODE_INDEX];
     }
 
+
+    /**
+     * @param parameters String parameters with source and target language code
+     * @return String with only target language code
+     * @throws TranslateServiceException can be thrown if translate parameters have wrong format
+     */
     private String getTargetLanguageCodeFromParams(String parameters) throws TranslateServiceException {
         try {
             return parameters.split(REGEX_FOR_SPLIT_LANGUAGE_PARAMETERS)[TARGET_CODE_INDEX];
@@ -69,10 +86,18 @@ public class YandexTranslateService implements TranslateService {
         }
     }
 
+    /**
+     * @param message String original message
+     * @return List of words from original message
+     */
     private List<String> splitMessageToWords(String message) {
         return Arrays.stream(message.split(REGEX_FOR_SPLIT_WORDS_FROM_MESSAGE)).toList();
     }
 
+    /**
+     * @param wordsList original List of words
+     * @return initial list of words split into several lists
+     */
     private List<List<String>> splitIntoParts(List<String> wordsList) {
         int size = wordsList.size();
         int countOfLists = Math.min(size, MAX_COUNT_OF_LISTS);
@@ -89,6 +114,13 @@ public class YandexTranslateService implements TranslateService {
         return parts;
     }
 
+
+    /**
+     * @param listOfMessages List of lists with words to translate
+     * @param sourceLanguageCode String of source language code
+     * @param targetLanguageCode String of target language code
+     * @return List of YandexMessageToTranslate
+     */
     private List<YandexMessageToTranslate> buildListOfMessagesToTranslate(List<List<String>> listOfMessages,
                                                                           String sourceLanguageCode,
                                                                           String targetLanguageCode) {
@@ -100,6 +132,10 @@ public class YandexTranslateService implements TranslateService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @param messagesToTranslate List of YandexMessageToTranslate
+     * @return List of YandexTranslatedMessage with translated message
+     */
     private List<YandexTranslatedMessage> getAsyncTranslateFromYandex(List<YandexMessageToTranslate> messagesToTranslate) {
         List<Callable<YandexTranslatedMessage>> callables =
                 messagesToTranslate.stream()
@@ -126,6 +162,11 @@ public class YandexTranslateService implements TranslateService {
     }
 
 
+    /**
+     * @param yandexMessageToTranslate YandexMessageToTranslate to send it to yandex
+     * @return YandexTranslatedMessage with translations from Yandex
+     * @throws TranslateServiceException can be thrown if Yandex return an error
+     */
     private YandexTranslatedMessage getTranslateFromYandex(YandexMessageToTranslate yandexMessageToTranslate)
             throws TranslateServiceException {
         HttpHeaders headers = new HttpHeaders();
@@ -141,12 +182,20 @@ public class YandexTranslateService implements TranslateService {
         }
     }
 
+    /**
+     * @param yandexTranslatedMessage to parse translated words from it
+     * @return List of translated words
+     */
     private List<String> getTranslatedWordsFromYandexTranslatedMessage(YandexTranslatedMessage yandexTranslatedMessage) {
         return yandexTranslatedMessage.getTranslations().stream()
                 .map(YandexTranslatedWord::getText)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * @param translatedMessageList List of YandexTranslatedMessage
+     * @return List of translated words
+     */
     private List<String> getTranslatedWordsFromYandexTranslatedMessage(List<YandexTranslatedMessage> translatedMessageList) {
         List<String> result = new ArrayList<>();
         translatedMessageList.stream()

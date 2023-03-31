@@ -34,6 +34,10 @@ public class LogToDbServiceImpl implements LogToDbService {
         this.properties = properties;
     }
 
+    /**
+     * @param request RequestEntity that would be added into DB
+     * @param ip Ip address from which request was sent
+     */
     @Override
     public void logSuccess(RequestEntity request,
                            String ip) {
@@ -54,6 +58,10 @@ public class LogToDbServiceImpl implements LogToDbService {
         }
     }
 
+    /**
+     * @param request RequestEntity that would be added into DB
+     * @param ip Ip address from which request was sent
+     */
     @Override
     public void logFailure(RequestEntity request, String ip) {
         try (Connection connection = getNewConnection()) {
@@ -63,6 +71,10 @@ public class LogToDbServiceImpl implements LogToDbService {
         }
     }
 
+    /**
+     * @return new Connections to db from DriverManager
+     * @throws SQLException
+     */
     private Connection getNewConnection() throws SQLException {
         String url = properties.getUrl();
         String username = properties.getUsername();
@@ -70,6 +82,12 @@ public class LogToDbServiceImpl implements LogToDbService {
         return DriverManager.getConnection(url, username, password);
     }
 
+    /**
+     * @param connection Connection to db
+     * @param request RequestEntity that would be added into DB
+     * @param ip address from which request was sent
+     * @throws SQLException
+     */
     private void saveRequest(Connection connection,
                              RequestEntity request,
                              String ip) throws SQLException {
@@ -83,7 +101,11 @@ public class LogToDbServiceImpl implements LogToDbService {
             insertRequestTable.executeUpdate();
         }
     }
-
+    /**
+     * @param connection - Connection to db
+     * @param request - RequestEntity that would be added into DB
+     * @throws SQLException
+     */
     private void saveWords(Connection connection, RequestEntity request) throws SQLException {
         try (PreparedStatement insertWordTable = connection.prepareStatement(INSERT_WORD_TABLE)) {
             for (String word : request.getTranslatedWords()) {
