@@ -11,9 +11,9 @@ public class ErrorBody {
     public ErrorBody() {
     }
 
-    public ErrorBody(int statusCode, String error) {
-        this.statusCode = statusCode;
+    public ErrorBody(String error, HttpStatusCode statusCode) {
         this.error = error;
+        this.statusCode = statusCode.value();
     }
 
     public String getError() {
@@ -32,9 +32,4 @@ public class ErrorBody {
         this.statusCode = statusCode.value();
     }
 
-
-    public ErrorBody(String error, HttpStatusCode statusCode) {
-        this.error = error;
-        this.statusCode = statusCode.value();
-    }
 }
