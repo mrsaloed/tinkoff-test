@@ -7,9 +7,6 @@ import com.example.tinkofftest.services.LogToDbService;
 import com.example.tinkofftest.services.MessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,10 +24,8 @@ public class TranslateController {
         this.messageService = messageService;
     }
 
-    @PostMapping(value = "/",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_HTML_VALUE})
-    public ResponseEntity<TranslatedMessageBody> translate(@RequestBody MessageToTranslateBody messageToTranslateBody,
+    @PostMapping(value = "/")
+    public TranslatedMessageBody translate(@RequestBody MessageToTranslateBody messageToTranslateBody,
                                                            HttpServletRequest request) {
         TranslatedMessageBody translatedMessage = messageService.translate(messageToTranslateBody);
 
@@ -39,7 +34,7 @@ public class TranslateController {
 
         logToDbService.logSuccess(requestEntity, ip);
 
-        return new ResponseEntity<>(translatedMessage, HttpStatus.OK);
+        return translatedMessage;
     }
 
 }

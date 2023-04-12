@@ -23,7 +23,6 @@ import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.stream.Collectors;
 
 @Service
 public class YandexTranslateService implements TranslateService {
@@ -48,7 +47,8 @@ public class YandexTranslateService implements TranslateService {
      * @param message String with message to translate
      * @param parameters translate parameters
      * @return List of translated words
-     * @throws TranslateServiceException
+     * @throws TranslateServiceException can be thrown if translate parameters have wrong format
+     * or if Yandex return an error
      */
     public List<String> translate(String message, String parameters) throws TranslateServiceException {
         String sourceLanguageCode = getSourceLanguageCodeFromParams(parameters);
@@ -129,7 +129,7 @@ public class YandexTranslateService implements TranslateService {
                 .filter(el -> !el.isEmpty())
                 .map(el -> new YandexMessageToTranslate(el,
                         sourceLanguageCode, targetLanguageCode))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -189,7 +189,7 @@ public class YandexTranslateService implements TranslateService {
     private List<String> getTranslatedWordsFromYandexTranslatedMessage(YandexTranslatedMessage yandexTranslatedMessage) {
         return yandexTranslatedMessage.getTranslations().stream()
                 .map(YandexTranslatedWord::getText)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
