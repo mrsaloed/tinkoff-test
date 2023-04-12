@@ -1,7 +1,7 @@
 #
 #Build stage
 #
-FROM openjdk:19 as build
+FROM openjdk:17 as build
 WORKDIR tinkoff-test
 COPY mvnw .
 COPY .mvn .mvn
