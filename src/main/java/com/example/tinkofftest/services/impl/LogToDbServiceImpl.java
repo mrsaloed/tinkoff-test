@@ -34,34 +34,16 @@ public class LogToDbServiceImpl implements LogToDbService {
         this.properties = properties;
     }
 
-    /**
-     * @param request RequestEntity that would be added into DB
-     * @param ip Ip address from which request was sent
-     */
+
     @Override
-    public void logSuccess(RequestEntity request,
-                           String ip) {
+    public void logSuccess(RequestEntity request, String ip) {
         try (Connection connection = getNewConnection()) {
-            connection.setAutoCommit(false);
-            try {
-                saveRequest(connection, request, ip);
-                saveWords(connection, request);
-            } catch (SQLException e) {
-                connection.rollback();
-                connection.setAutoCommit(true);
-                throw e;
-            }
-            connection.commit();
-            connection.setAutoCommit(true);
+            saveRequestWithWords(connection, request, ip);
         } catch (SQLException e) {
             throw new SaveToDatabaseException(e);
         }
     }
 
-    /**
-     * @param request RequestEntity that would be added into DB
-     * @param ip Ip address from which request was sent
-     */
     @Override
     public void logFailure(RequestEntity request, String ip) {
         try (Connection connection = getNewConnection()) {
@@ -72,8 +54,32 @@ public class LogToDbServiceImpl implements LogToDbService {
     }
 
     /**
-     * @return new Connections to db from DriverManager
-     * @throws SQLException
+     * Transactional method to add information into Requests and Words tables.
+     * @param connection Connection to DB.
+     * @param request RequestEntity that would be added into DB.
+     * @param ip IP address from which request was sent.
+     * @throws SQLException thrown if some problems with adding to DB.
+     */
+    private void saveRequestWithWords(Connection connection,
+                                      RequestEntity request,
+                                      String ip) throws SQLException {
+        connection.setAutoCommit(false);
+        try {
+            saveRequest(connection, request, ip);
+            saveWords(connection, request);
+        } catch (SQLException e) {
+            connection.rollback();
+            connection.setAutoCommit(true);
+            throw e;
+        }
+        connection.commit();
+        connection.setAutoCommit(true);
+    }
+
+    /**
+     * Getting Connection to DB.
+     * @return new Connection to DB from DriverManager.
+     * @throws SQLException thrown if some problems with creation connection.
      */
     private Connection getNewConnection() throws SQLException {
         String url = properties.getUrl();
@@ -83,37 +89,40 @@ public class LogToDbServiceImpl implements LogToDbService {
     }
 
     /**
-     * @param connection Connection to db
-     * @param request RequestEntity that would be added into DB
-     * @param ip address from which request was sent
-     * @throws SQLException
+     * Adding information into Requests table.
+     * @param connection Connection to DB.
+     * @param request RequestEntity that would be added into DB.
+     * @param ip IP address from which request was sent.
+     * @throws SQLException thrown if some problems with saving RequestEntity.
      */
     private void saveRequest(Connection connection,
                              RequestEntity request,
                              String ip) throws SQLException {
-        try (PreparedStatement insertRequestTable = connection.prepareStatement(INSERT_REQUEST_TABLE)) {
-            insertRequestTable.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
-            insertRequestTable.setString(REQUEST_MESSAGE_PARAMETER_INDEX, request.getInputData());
-            insertRequestTable.setString(RESPONSE_MESSAGE_PARAMETER_INDEX, request.getOutputData());
-            insertRequestTable.setTime(TIME_PARAMETER_INDEX, request.getRequestTime());
-            insertRequestTable.setString(TRANSLATE_PARAMS_PARAMETER_INDEX, request.getParameters());
-            insertRequestTable.setString(IP_PARAMETER_INDEX, ip);
-            insertRequestTable.executeUpdate();
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_REQUEST_TABLE)) {
+            statement.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
+            statement.setString(REQUEST_MESSAGE_PARAMETER_INDEX, request.getInputData());
+            statement.setString(RESPONSE_MESSAGE_PARAMETER_INDEX, request.getOutputData());
+            statement.setTime(TIME_PARAMETER_INDEX, request.getRequestTime());
+            statement.setString(TRANSLATE_PARAMS_PARAMETER_INDEX, request.getParameters());
+            statement.setString(IP_PARAMETER_INDEX, ip);
+            statement.executeUpdate();
         }
     }
+
     /**
-     * @param connection - Connection to db
-     * @param request - RequestEntity that would be added into DB
-     * @throws SQLException
+     * Adding information into Words table.
+     * @param connection Connection to db.
+     * @param request RequestEntity that would be added into DB.
+     * @throws SQLException thrown if some problems with saving words.
      */
     private void saveWords(Connection connection, RequestEntity request) throws SQLException {
-        try (PreparedStatement insertWordTable = connection.prepareStatement(INSERT_WORD_TABLE)) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_WORD_TABLE)) {
             for (String word : request.getTranslatedWords()) {
-                insertWordTable.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
-                insertWordTable.setString(WORD_PARAMETER_INDEX, word);
-                insertWordTable.addBatch();
+                statement.setString(REQUEST_ID_PARAMETER_INDEX, request.getId().toString());
+                statement.setString(WORD_PARAMETER_INDEX, word);
+                statement.addBatch();
             }
-            insertWordTable.executeBatch();
+            statement.executeBatch();
         }
     }
 }
